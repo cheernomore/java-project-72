@@ -1,6 +1,7 @@
 plugins {
     application
     id("io.freefair.lombok") version "8.6"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "hexlet.code"
@@ -17,6 +18,10 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+application {
+    mainClass.set("hexlet.code.App")
 }
 
 tasks.test {

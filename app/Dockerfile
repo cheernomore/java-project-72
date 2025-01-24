@@ -1,0 +1,12 @@
+# Этап 1: Сборка приложения
+FROM eclipse-temurin:21 AS builder
+WORKDIR /app
+COPY . .
+RUN ./gradlew clean shadowJar
+
+# Этап 2: Создание минимального образа для запуска
+FROM eclipse-temurin:21
+WORKDIR /app
+COPY --from=builder build/libs/app-1.0-SNAPSHOT-all.jar app.jar
+ENV PORT=8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
