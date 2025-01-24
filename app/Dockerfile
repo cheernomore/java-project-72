@@ -8,5 +8,5 @@ RUN app/gradlew clean shadowJar
 FROM eclipse-temurin:21
 WORKDIR /app
 COPY --from=builder build/libs/app-1.0-SNAPSHOT-all.jar app.jar
-ENV PORT=8080
+ENV PORT=8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
