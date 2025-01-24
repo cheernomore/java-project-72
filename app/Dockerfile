@@ -2,11 +2,7 @@ FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-COPY app/gradle gradle
-COPY app/build.gradle.kts .
-COPY app/settings.gradle.kts .
-COPY app/gradlew .
-COPY app/src .
+COPY app/ ./
 
 RUN ./gradlew --no-daemon shadowJar
 
