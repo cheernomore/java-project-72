@@ -9,9 +9,9 @@ COPY gradlew .
 
 RUN ./gradlew --no-daemon dependencies
 
-COPY src src
+COPY src .
 
-RUN ./gradlew --no-daemon build
+RUN ./gradlew --no-daemon shadowJar
 
 ENV PORT=8080
 
