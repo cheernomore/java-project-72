@@ -1,10 +1,10 @@
 FROM eclipse-temurin:21
 
-WORKDIR .
+WORKDIR app
 
 COPY . .
 
-RUN chmod +x app/gradlew && app/gradle shadowJar
+RUN gradlew shadowJar
 
 ENV PORT=8081
 
