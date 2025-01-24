@@ -1,11 +1,18 @@
-FROM eclipse-temurin:21
+FROM eclipse-temurin:21-jdk
 
-WORKDIR app
+WORKDIR /app
 
-COPY . .
+COPY gradle gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
+COPY gradlew .
 
-RUN gradlew shadowJar
+RUN ./gradlew --no-daemon dependencies
 
-ENV PORT=8081
+COPY src src
 
-CMD java -jar app/build/libs/app-1.0-SNAPSHOT-all.jar
+RUN ./gradlew --no-daemon build
+
+ENV PORT=8080
+
+CMD java -jar build/libs/app-1.0-SNAPSHOT-all.jar
