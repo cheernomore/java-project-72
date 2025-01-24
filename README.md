@@ -1,2 +1,3 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/cheernomore/java-project-72/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/cheernomore/java-project-72/actions)
+| Hexlet Tests and Linter Status | Maintainability | Test Coverage |
+| ------------------------------- | ---------------- | ------------- |
+| [![Actions Status](https://github.com/cheernomore/java-project-72/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/cheernomore/java-project-72/actions) | [![Maintainability](https://api.codeclimate.com/v1/badges/d30473d747a4229d8e59/maintainability)](https://codeclimate.com/github/cheernomore/java-project-72/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/d30473d747a4229d8e59/test_coverage)](https://codeclimate.com/github/cheernomore/java-project-72/test_coverage) |
