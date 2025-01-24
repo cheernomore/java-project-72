@@ -9,7 +9,7 @@ COPY gradlew .
 
 RUN ./gradlew --no-daemon dependencies
 
-COPY src .
+COPY app/src src
 
 RUN ./gradlew --no-daemon shadowJar
 
