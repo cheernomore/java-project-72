@@ -4,7 +4,7 @@ WORKDIR .
 
 COPY . .
 
-RUN app/gradle shadowJar
+RUN chmod +x app/gradlew && app/gradle shadowJar
 
 ENV PORT=8081
 
