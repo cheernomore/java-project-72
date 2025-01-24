@@ -1,7 +1,8 @@
 # Этап 1: Сборка приложения
 FROM eclipse-temurin:21 AS builder
 WORKDIR /app
-RUN ./gradlew clean shadowJar
+COPY . .
+RUN app/gradlew clean shadowJar
 
 # Этап 2: Создание минимального образа для запуска
 FROM eclipse-temurin:21
