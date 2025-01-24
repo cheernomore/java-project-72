@@ -13,4 +13,4 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/app-1.0-SNAPSHOT-all.jar app.jar
 
 ENV PORT=8081
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT [ "java", "-jar", "app.jar"]
