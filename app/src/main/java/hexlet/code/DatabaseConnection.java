@@ -4,14 +4,13 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 public class DatabaseConnection {
     private static final String DEFAULT_H2_URL = "jdbc:h2:mem:project"; //DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:schema.sql'";
     private static final String DEFAULT_H2_USER = "test";
     private static final String DEFAULT_H2_PASSWORD = "";
 
-    public static DataSource getDataSource() throws SQLException {
+    public static DataSource getDataSource() {
         HikariConfig hikariConfig = new HikariConfig();
         String jdbcUrl = System.getenv("JDBC_DATABASE_URL");
         String username;
