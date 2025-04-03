@@ -6,7 +6,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 
 public class DatabaseConnection {
-    private static final String DEFAULT_H2_URL = "jdbc:h2:mem:project"; //DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:schema.sql'";
+    private static final String DEFAULT_H2_URL = "jdbc:h2:mem:project";
+    //DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:schema.sql'";
     private static final String DEFAULT_H2_USER = "test";
     private static final String DEFAULT_H2_PASSWORD = "";
 
