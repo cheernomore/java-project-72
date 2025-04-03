@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY app/ ./
 
+
 RUN ./gradlew --no-daemon shadowJar
 
 ENV PORT=8080
