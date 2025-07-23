@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 public class App {
     public static void main(String[] args) {
         int port = Integer.parseInt(System.getenv("PORT"));
-
         DatabaseInitializer.initializeDatabase();
-
         getApp().start(port);
     }
 
