@@ -9,7 +9,7 @@ plugins {
 group = "hexlet.code"
 version = "1.0-SNAPSHOT"
 
-val javalinVersion = "6.5.0"
+val javalinVersion = "6.7.0"
 val pangolinVersion = "42.7.2"
 
 repositories {
@@ -18,8 +18,10 @@ repositories {
 
 dependencies {
     implementation("io.javalin:javalin:${javalinVersion}")
-    implementation("org.slf4j:slf4j-simple:2.0.16")
+    implementation("gg.jte:jte:3.2.1")
+    implementation("io.javalin:javalin-rendering:${javalinVersion}")
 
+    implementation("org.slf4j:slf4j-simple:2.0.16")
     implementation("org.postgresql:postgresql:${pangolinVersion}")
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("com.h2database:h2:2.3.232")
