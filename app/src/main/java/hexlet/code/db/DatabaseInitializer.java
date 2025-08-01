@@ -1,4 +1,4 @@
-package hexlet.code;
+package hexlet.code.db;
 
 import java.io.InputStream;
 import java.sql.Connection;

@@ -1,15 +1,12 @@
-package hexlet.code;
+package hexlet.code.db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import hexlet.code.config.DatabaseConfig;
 
 import javax.sql.DataSource;
 
 public class DatabaseConnection {
-    private static final String DEFAULT_H2_URL = "jdbc:h2:mem:project";
-    //DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:schema.sql'";
-    private static final String DEFAULT_H2_USER = "test";
-    private static final String DEFAULT_H2_PASSWORD = "";
 
     public static DataSource getDataSource() {
         HikariConfig hikariConfig = new HikariConfig();
@@ -18,9 +15,9 @@ public class DatabaseConnection {
         String password;
 
         if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-            jdbcUrl = DEFAULT_H2_URL;
-            username = DEFAULT_H2_USER;
-            password = DEFAULT_H2_PASSWORD;
+            jdbcUrl = DatabaseConfig.DEFAULT_H2_URL;
+            username = DatabaseConfig.DEFAULT_H2_USER;
+            password = DatabaseConfig.DEFAULT_H2_PASSWORD;
         } else {
             username = System.getenv("JDBC_DATABASE_USERNAME");
             password = System.getenv("JDBC_DATABASE_PASSWORD");
@@ -29,6 +26,7 @@ public class DatabaseConnection {
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
+        hikariConfig.setDriverClassName(DatabaseConfig.H2_DRIVER);
 
         return new HikariDataSource(hikariConfig);
     }

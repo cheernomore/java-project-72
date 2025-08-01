@@ -26,6 +26,8 @@ dependencies {
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("com.h2database:h2:2.3.232")
 
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
