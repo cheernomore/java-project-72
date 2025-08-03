@@ -1,5 +1,6 @@
 plugins {
     application
+    jacoco
     id("io.freefair.lombok") version "8.6"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("checkstyle")
@@ -11,6 +12,9 @@ version = "1.0-SNAPSHOT"
 
 val javalinVersion = "6.7.0"
 val pangolinVersion = "42.7.2"
+val jupyterVersion = "5.10.0"
+val restAssuredVersion = "5.5.5"
+val assertJVersion = "3.25.1"
 
 repositories {
     mavenCentral()
@@ -29,7 +33,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter:${jupyterVersion}")
+    testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
+    testImplementation("org.assertj:assertj-core:${assertJVersion}")
 }
 
 application {
