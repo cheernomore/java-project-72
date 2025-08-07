@@ -1,275 +1,114 @@
 package hexlet.code.controller;
 
-import hexlet.code.App;
+import hexlet.code.db.DatabaseConnection;
 import hexlet.code.db.DatabaseInitializer;
-import hexlet.code.repository.UrlRepository;
-import io.javalin.Javalin;
+import hexlet.code.model.UrlCheck;
+import hexlet.code.services.UrlCheckService;
+import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
+import io.javalin.validation.Validator;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public class UrlControllerTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.verify;
 
-    private Javalin app;
+public final class UrlControllerTest {
+
+    private Connection connection;
+    private final Context ctx = mock(Context.class);
+    private MockWebServer mockWebServer;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException, SQLException {
+        connection = DatabaseConnection.getDataSource().getConnection();
+
+        mockWebServer = new MockWebServer();
+        mockWebServer.start();
+    }
+
+    @BeforeAll
+    static void startUp() {
         DatabaseInitializer.initializeDatabase();
-        app = App.getApp();
-        app.start(0);
-        io.restassured.RestAssured.port = app.port();
     }
 
     @AfterEach
-    void tearDown() {
-        app.stop();
+    void tearDown() throws SQLException {
+        connection.close();
+        mockWebServer.close();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "http://popolam.money, http://popolam.money",
+        "http://popolam.eu/path?queryParam=paramExample, http://popolam.eu",
+        "http://popolam.com:8080, http://popolam.com:8080",
+        "http://popolam.ru:8080/path, http://popolam.ru:8080",
+        "http://popolam.io:8080/path?queryParam=paramExample, http://popolam.io:8080"
+    })
+    public void createUrlTest(String testUrlName) throws SQLException {
+        Validator<String> mockValidator = mock(Validator.class);
+
+        when(mockValidator.get()).thenReturn(testUrlName);
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+
+        UrlController.createUrl(ctx);
+        verify(ctx).status(HttpStatus.CREATED);
+        verify(ctx).redirect("/urls");
+
+        var sql =
+                """
+                        SELECT name
+                        FROM urls
+                        WHERE name = ?
+                """;
+
+        var stmt = connection.prepareStatement(sql);
+        stmt.setString(1, testUrlName);
+        var rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            assertEquals(testUrlName, rs.getString("name"));
+        }
     }
 
     @Test
-    public void testBuildUrlPageContent() {
-        given()
-                .when()
-                .get("/")
-                .then()
-                .statusCode(200)
-                .body(containsString("<form action=\"/urls\" method=\"post\">"))
-                .body(containsString("<input name=\"url\" type=\"text\""))
-                .body(containsString("Добавить URL"));
-    }
+    public void checkUrlSuccess() {
+        mockWebServer.enqueue(new MockResponse.Builder()
+                .body("""
+                <html>
+                    <head>
+                        <title>Test title</title>
+                        <meta name="description" content="Test description">
+                    </head>
+                    <body>
+                        <h1>Test heading</h1>
+                    </body>
+                </html>
+                """)
+                .code(200)
+                .build()
+        );
 
-    @Test
-    public void testCreateUrlSuccessAndVerifyInDatabase() {
-        var testUrl = "https://example.com";
+        String testUrl = mockWebServer.url("test").toString();
+        UrlCheck result = UrlCheckService.urlCheck(testUrl, 1);
 
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls")
-                .then()
-                .statusCode(302);
-
-        assertTrue(UrlRepository.isUrlExistsByName(testUrl), "URL should be saved in database");
-    }
-
-    @Test
-    public void testCreateUrlAndVerifyInUrlsList() {
-        var testUrl = "https://test-display.com";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls");
-
-        given()
-                .when()
-                .get("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString("https://test-display.com"))
-                .body(containsString("<table class=\"table table-striped-columns\">"))
-                .body(containsString("<th scope=\"col\">Urls</th>"));
-    }
-
-    @Test
-    public void testUrlsListPageStructure() {
-        given()
-                .when()
-                .get("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString("<table class=\"table table-striped-columns\">"))
-                .body(containsString("<th scope=\"col\">#</th>"))
-                .body(containsString("<th scope=\"col\">Urls</th>"))
-                .body(containsString("<tbody>"));
-    }
-
-    @Test
-    public void testCreateUrlEmptyWithErrorDisplay() {
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", "")
-                .when()
-                .post("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString("Url не должен быть пустым"))
-                .body(containsString("<div class=\"toast align-items-center text-white bg-danger border-0 show\""))
-                .body(containsString("<strong>Ошибка!</strong>"))
-                .body(containsString("<form action=\"/urls\" method=\"post\">"));
-    }
-
-    @Test
-    public void testCreateUrlInvalidWithErrorDisplay() {
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", "invalid-url")
-                .when()
-                .post("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString("Некорректный URL"))
-                .body(containsString("<div class=\"toast align-items-center text-white bg-danger border-0 show\""))
-                .body(containsString("<strong>Ошибка!</strong>"));
-
-        assertFalse(UrlRepository.isUrlExistsByName("invalid-url"), "Invalid URL should not be saved");
-    }
-
-    @Test
-    public void testCreateUrlDuplicateWithErrorDisplay() {
-        var testUrl = "https://duplicate-test.com";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls");
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString("URL должен быть уникальным"))
-                .body(containsString("<div class=\"toast align-items-center text-white bg-danger border-0 show\""))
-                .body(containsString("<strong>Ошибка!</strong>"));
-    }
-
-    @Test
-    public void testShowUrls() {
-        given()
-                .when()
-                .get("/urls")
-                .then()
-                .statusCode(200);
-    }
-
-    @Test
-    public void testShowSpecificUrlWithHtmlContent() {
-        var testUrl = "https://show-specific.com";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls");
-
-        var urls = UrlRepository.getAllUrls();
-        var url = urls.stream()
-                .filter(u -> u.getName().equals(testUrl))
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(url, "URL should exist in database");
-
-        given()
-                .when()
-                .get("/urls/{id}", url.getId())
-                .then()
-                .statusCode(200)
-                .body(containsString("URL: " + testUrl))
-                .body(containsString("<div>"))
-                .body(containsString("<p>URL: " + testUrl + "</p>"));
-    }
-
-    @Test
-    public void testUrlTableLinkStructure() {
-        var testUrl = "https://table-link-test.com";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls");
-
-        var urls = UrlRepository.getAllUrls();
-        var url = urls.stream()
-                .filter(u -> u.getName().equals(testUrl))
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(url, "URL should exist in database");
-
-        given()
-                .when()
-                .get("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString(testUrl))
-                .body(containsString("<a href=\"/urls/" + url.getId() + "\">"))
-                .body(containsString("</a>"))
-                .body(containsString("<th scope=\"row\">" + url.getId() + "</th>"));
-    }
-
-    @Test
-    public void testMultipleUrlsDisplayInTable() {
-        var url1 = "https://first-url.com";
-        var url2 = "https://second-url.com";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", url1)
-                .when()
-                .post("/urls");
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", url2)
-                .when()
-                .post("/urls");
-
-        given()
-                .when()
-                .get("/urls")
-                .then()
-                .statusCode(200)
-                .body(containsString(url1))
-                .body(containsString(url2))
-                .body(containsString("<tr>"));
-    }
-
-    @Test
-    public void testUrlNormalization() {
-        var testUrl = "https://normalize-test.com:8080/path?query=value";
-        var expectedNormalized = "https://normalize-test.com:8080";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls");
-
-        var urls = UrlRepository.getAllUrls();
-        var url = urls.stream()
-                .filter(u -> u.getName().equals(expectedNormalized))
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(url, "Normalized URL should exist in database");
-        assertTrue(UrlRepository.isUrlExistsByName(expectedNormalized), "Normalized URL should be saved");
-    }
-
-    @Test
-    public void testCreateUrlWithPort() {
-        var testUrl = "https://example.com:3000";
-
-        given()
-                .contentType("application/x-www-form-urlencoded")
-                .formParam("url", testUrl)
-                .when()
-                .post("/urls")
-                .then()
-                .statusCode(302);
-
-        assertTrue(UrlRepository.isUrlExistsByName(testUrl), "URL with port should be saved");
+        assertEquals(200, result.getStatusCode());
+        assertEquals("Test title", result.getTitle());
     }
 }

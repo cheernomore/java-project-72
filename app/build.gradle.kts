@@ -15,6 +15,8 @@ val pangolinVersion = "42.7.2"
 val jupyterVersion = "5.10.0"
 val restAssuredVersion = "5.5.5"
 val assertJVersion = "3.25.1"
+val mockitoVersion = "5.18.0"
+val mockWebServerVersion = "5.1.0"
 
 repositories {
     mavenCentral()
@@ -24,18 +26,21 @@ dependencies {
     implementation("io.javalin:javalin:${javalinVersion}")
     implementation("gg.jte:jte:3.2.1")
     implementation("io.javalin:javalin-rendering:${javalinVersion}")
-
     implementation("org.slf4j:slf4j-simple:2.0.16")
     implementation("org.postgresql:postgresql:${pangolinVersion}")
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("com.h2database:h2:2.3.232")
-
+    implementation("org.jsoup:jsoup:1.21.1")
+    implementation("com.konghq:unirest-java-core:4.5.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter:${jupyterVersion}")
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
     testImplementation("org.assertj:assertj-core:${assertJVersion}")
+    testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+    testImplementation("com.squareup.okhttp3:mockwebserver3:${mockWebServerVersion}")
+
 }
 
 application {

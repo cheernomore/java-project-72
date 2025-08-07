@@ -26,7 +26,8 @@ public class App {
                 .get(NamedRoutes.urlsPath(), UrlController::showUrls)
                 .get(NamedRoutes.urlPath("{id}"), UrlController::show)
                 .get(NamedRoutes.buildUrlPath(), UrlController::buildUrl)
-                .post(NamedRoutes.urlsPath(), UrlController::createUrl);
+                .post(NamedRoutes.urlsPath(), UrlController::createUrl)
+                .post(NamedRoutes.urlsIdCheck("{id}"), UrlController::checkUrl);
     }
 
     private static int getPort() {

@@ -1,7 +1,6 @@
-| CI Status | Maintainability | Test Coverage | Build | Quality Gate |
-|-----------|------------------|----------------|-------|----------------|
-| [![Hexlet Check](https://github.com/cheernomore/java-project-72/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/cheernomore/java-project-72/actions/workflows/hexlet-check.yml) | [![Maintainability](https://api.codeclimate.com/v1/badges/d30473d747a4229d8e59/maintainability)](https://codeclimate.com/github/cheernomore/java-project-72/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/d30473d747a4229d8e59/test_coverage)](https://codeclimate.com/github/cheernomore/java-project-72/test_coverage) | ![Build](https://github.com/cheernomore/java-project-72/actions/workflows/build.yml/badge.svg) | [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=cheernomore_java-project-72&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=cheernomore_java-project-72) |
-
+| CI Status | Build | Quality Gate |
+|-----------|-------|----------------|
+| [![Hexlet Check](https://github.com/cheernomore/java-project-72/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/cheernomore/java-project-72/actions/workflows/hexlet-check.yml) | ![Build](https://github.com/cheernomore/java-project-72/actions/workflows/build.yml/badge.svg) | [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=cheernomore_java-project-72&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=cheernomore_java-project-72) |
 # SEO Validator
 
 ## Описание

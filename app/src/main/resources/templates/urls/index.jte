@@ -5,8 +5,8 @@
 @param UrlsPage page
 
 @template.layout.page(
-content = @`
-    <div class="container-fluid">
+    content = @`
+        <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <table class="table table-striped-columns">
@@ -14,6 +14,8 @@ content = @`
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Urls</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Checked at</th>
                         </tr>
                     </thead>
 
@@ -26,6 +28,13 @@ content = @`
                                     ${url.getName()}
                                 </a>
                             </td>
+                            @if(page.getUrlChecks().isEmpty() || page.getUrlChecks().get(url.getId()).getStatusCode() == 0)
+                                <td>Проверки не проводились</td>
+                                <td></td>
+                            @else
+                                <td>${page.getUrlChecks().get(url.getId()).getStatusCode()}</td>
+                                <td>${String.valueOf(page.getUrlChecks().get(url.getId()).getCreatedAt())}</td>
+                            @endif
                         </tr>
                     @endfor
                     </tbody>
@@ -34,7 +43,7 @@ content = @`
         </div>
     </div>
 
-    @if(page.getFlash() != null)
+        @if(page.getFlash() != null)
         <!-- Флеш-уведомление справа сверху -->
         <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
             <div class="toast align-items-center text-white bg-success border-0 show"
@@ -76,7 +85,7 @@ content = @`
         </script>
     @endif
 
-    <style>
+        <style>
         /* Дополнительные стили для плавной анимации */
         .toast {
             animation: slideInRight 0.3s ease-out;
