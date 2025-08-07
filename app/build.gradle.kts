@@ -47,14 +47,58 @@ application {
     mainClass.set("hexlet.code.App")
 }
 
-sonar {
-    properties {
-        property("sonar.projectKey", "cheernomore_java-project-72")
-        property("sonar.organization", "cheernomore")
-        property("sonar.host.url", "https://sonarcloud.io")
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
     }
 }
 
+sonar {
+    properties {
+        property("sonar.projectKey", "cheernomore_java-project-72")
+        property("sonar.organization", "cheernomore")  // замените на вашу
+        property("sonar.host.url", "https://sonarcloud.io")
+
+        // Пути к исходникам
+        property("sonar.sources", "src/main/java")
+        property("sonar.tests", "src/test/java")
+
+        // КЛЮЧЕВОЕ: путь к JaCoCo отчету
+        property("sonar.coverage.jacoco.xmlReportPaths",
+            "build/reports/jacoco/test/jacocoTestReport.xml")
+
+        // Дополнительные настройки
+        property("sonar.java.coveragePlugin", "jacoco")
+        property("sonar.java.binaries", "build/classes")
+        property("sonar.java.test.binaries", "build/classes")
+    }
+}
+
+
+// Связываем задачи
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.sonar {
+    dependsOn(tasks.jacocoTestReport)
 }
