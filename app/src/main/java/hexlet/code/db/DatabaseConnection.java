@@ -8,7 +8,13 @@ import javax.sql.DataSource;
 
 public class DatabaseConnection {
 
+    private static final DataSource DATA_SOURCE = createDataSource();
+
     public static DataSource getDataSource() {
+        return DATA_SOURCE;
+    }
+
+    private static DataSource createDataSource() {
         HikariConfig hikariConfig = new HikariConfig();
         String jdbcUrl = System.getenv("JDBC_DATABASE_URL");
         String username;
@@ -28,6 +34,11 @@ public class DatabaseConnection {
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
+
+        hikariConfig.setMaximumPoolSize(10);
+        hikariConfig.setMinimumIdle(2);
+        hikariConfig.setConnectionTimeout(30000);
+        hikariConfig.setIdleTimeout(600000);
 
         return new HikariDataSource(hikariConfig);
     }
