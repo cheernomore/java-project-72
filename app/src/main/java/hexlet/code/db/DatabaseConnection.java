@@ -14,10 +14,11 @@ public class DatabaseConnection {
         String username;
         String password;
 
-        if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+        if (jdbcUrl.isEmpty()) {
             jdbcUrl = DatabaseConfig.DEFAULT_H2_URL;
             username = DatabaseConfig.DEFAULT_H2_USER;
             password = DatabaseConfig.DEFAULT_H2_PASSWORD;
+            hikariConfig.setDriverClassName(DatabaseConfig.H2_DRIVER);
         } else {
             username = System.getenv("JDBC_DATABASE_USERNAME");
             password = System.getenv("JDBC_DATABASE_PASSWORD");
@@ -26,7 +27,7 @@ public class DatabaseConnection {
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
-        hikariConfig.setDriverClassName(DatabaseConfig.H2_DRIVER);
+        hikariConfig.setDriverClassName(DatabaseConfig.POSTGRES_DRIVER);
 
         return new HikariDataSource(hikariConfig);
     }
