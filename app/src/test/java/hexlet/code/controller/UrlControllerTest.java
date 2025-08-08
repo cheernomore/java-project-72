@@ -32,7 +32,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -360,14 +359,14 @@ public final class UrlControllerTest {
     @Test
     public void createUrlInvalidUrlTest() {
         Validator<String> mockValidator = mock(Validator.class);
-        
+
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
         when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
         when(mockValidator.check(any(), anyString())).thenThrow(new ValidationException(Map.of()));
         when(ctx.formParam("url")).thenReturn("invalid-url");
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).render(eq("urls/build.jte"), any(Map.class));
     }
 
@@ -376,17 +375,17 @@ public final class UrlControllerTest {
         try (MockedStatic<UrlRepository> mockedRepo = mockStatic(UrlRepository.class)) {
             Validator<String> mockValidator = mock(Validator.class);
             String existingUrl = "https://existing.com";
-            
+
             when(mockValidator.get()).thenReturn(existingUrl);
             when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
             when(mockValidator.check(any(), anyString())).thenThrow(new ValidationException(Map.of()));
             when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
             when(ctx.formParam("url")).thenReturn(existingUrl);
-            
+
             mockedRepo.when(() -> UrlRepository.isUrlExistsByName(existingUrl)).thenReturn(true);
-            
+
             UrlController.createUrl(ctx);
-            
+
             verify(ctx).render(eq("urls/build.jte"), any(Map.class));
         }
     }
@@ -412,13 +411,13 @@ public final class UrlControllerTest {
     public void createUrlWithSpecialPortTest() {
         Validator<String> mockValidator = mock(Validator.class);
         String urlWithPort = "http://example.com:9999/path";
-        
+
         when(mockValidator.get()).thenReturn(urlWithPort);
         when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).status(HttpStatus.CREATED);
         verify(ctx).redirect("/urls");
         verify(ctx).sessionAttribute("flash", "Url has been created!");
@@ -429,30 +428,30 @@ public final class UrlControllerTest {
         // Test URL normalization with different port scenarios
         Validator<String> mockValidator = mock(Validator.class);
         String urlWithPath = "https://example.org:443/some/path?query=value";
-        
+
         when(mockValidator.get()).thenReturn(urlWithPath);
         when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).status(HttpStatus.CREATED);
         verify(ctx).redirect("/urls");
         verify(ctx).sessionAttribute("flash", "Url has been created!");
     }
 
-    @Test  
+    @Test
     public void createUrlWithoutPortTest() {
         // Test URL without explicit port to test normalizeUrl branch
         Validator<String> mockValidator = mock(Validator.class);
         String urlWithoutPort = "https://example.org/path";
-        
+
         when(mockValidator.get()).thenReturn(urlWithoutPort);
         when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).status(HttpStatus.CREATED);
         verify(ctx).redirect("/urls");
         verify(ctx).sessionAttribute("flash", "Url has been created!");
@@ -463,13 +462,13 @@ public final class UrlControllerTest {
         // Test another URL variation to increase coverage
         Validator<String> mockValidator = mock(Validator.class);
         String urlEdgeCase = "http://test.example.co.uk:80";
-        
+
         when(mockValidator.get()).thenReturn(urlEdgeCase);
         when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).status(HttpStatus.CREATED);
         verify(ctx).redirect("/urls");
         verify(ctx).sessionAttribute("flash", "Url has been created!");
