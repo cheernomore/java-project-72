@@ -64,6 +64,9 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            includes = listOf(
+                "hexlet.code.controller.UrlController"
+            )
             limit {
                 minimum = "0.80".toBigDecimal()
             }

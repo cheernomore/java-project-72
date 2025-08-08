@@ -30,7 +30,15 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 public final class UrlControllerTest {
@@ -103,14 +111,12 @@ public final class UrlControllerTest {
         Url testUrl = new Url();
         testUrl.setId(1);
         testUrl.setName("https://google.com");
-        
         UrlCheck testCheck = new UrlCheck();
         testCheck.setId(1);
         testCheck.setStatusCode(200);
 
         try (MockedStatic<UrlRepository> mockedRepo = mockStatic(UrlRepository.class);
              MockedStatic<UrlCheckRepository> mockedCheckRepo = mockStatic(UrlCheckRepository.class)) {
-            
             mockedRepo.when(() -> UrlRepository.findById(1)).thenReturn(testUrl);
             mockedCheckRepo.when(() -> UrlCheckRepository.findAllById(1)).thenReturn(List.of(testCheck));
 
@@ -160,26 +166,25 @@ public final class UrlControllerTest {
     @Test
     public void createUrlValidationErrorTest() {
         Validator<String> mockValidator = mock(Validator.class);
-        
         when(mockValidator.check(any(), anyString())).thenThrow(new ValidationException(Map.of()));
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
         when(ctx.formParam("url")).thenReturn("invalid-url");
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).render(eq("urls/build.jte"), any(Map.class));
     }
 
-    @Test  
+    @Test
     public void createUrlEmptyTest() {
         Validator<String> mockValidator = mock(Validator.class);
-        
+
         when(mockValidator.check(any(), anyString())).thenThrow(new ValidationException(Map.of()));
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
         when(ctx.formParam("url")).thenReturn("");
-        
+
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).render(eq("urls/build.jte"), any(Map.class));
     }
 
@@ -187,21 +192,21 @@ public final class UrlControllerTest {
     public void showUrlsTest() {
         try (MockedStatic<UrlRepository> mockedUrlRepo = mockStatic(UrlRepository.class);
              MockedStatic<UrlCheckRepository> mockedCheckRepo = mockStatic(UrlCheckRepository.class)) {
-            
+
             Url testUrl = new Url();
             testUrl.setId(1);
             testUrl.setName("https://example.com");
-            
+
             UrlCheck testCheck = new UrlCheck();
             testCheck.setId(1);
             testCheck.setStatusCode(200);
-            
+
             mockedUrlRepo.when(UrlRepository::getAllUrls).thenReturn(List.of(testUrl));
             mockedCheckRepo.when(() -> UrlCheckRepository.findById(1)).thenReturn(testCheck);
             when(ctx.consumeSessionAttribute("flash")).thenReturn("Test flash message");
-            
+
             UrlController.showUrls(ctx);
-            
+
             verify(ctx).render(eq("urls/index.jte"), any(Map.class));
             verify(ctx).consumeSessionAttribute("flash");
         }
@@ -213,11 +218,11 @@ public final class UrlControllerTest {
             Validator<Integer> mockValidator = mock(Validator.class);
             when(mockValidator.get()).thenReturn(1);
             when(ctx.pathParamAsClass("id", Integer.class)).thenReturn(mockValidator);
-            
+
             mockedRepo.when(() -> UrlRepository.findById(1)).thenReturn(null);
-            
+
             UrlController.checkUrl(ctx);
-            
+
             verify(ctx, never()).redirect(anyString());
         }
     }
@@ -227,23 +232,23 @@ public final class UrlControllerTest {
         try (MockedStatic<UrlRepository> mockedUrlRepo = mockStatic(UrlRepository.class);
              MockedStatic<UrlCheckService> mockedCheckService = mockStatic(UrlCheckService.class);
              MockedStatic<UrlCheckRepository> mockedCheckRepo = mockStatic(UrlCheckRepository.class)) {
-            
+
             Url testUrl = new Url();
             testUrl.setId(1);
             testUrl.setName("https://example.com");
-            
+
             UrlCheck testCheck = new UrlCheck();
             testCheck.setStatusCode(200);
-            
+
             Validator<Integer> mockValidator = mock(Validator.class);
             when(mockValidator.get()).thenReturn(1);
             when(ctx.pathParamAsClass("id", Integer.class)).thenReturn(mockValidator);
-            
+
             mockedUrlRepo.when(() -> UrlRepository.findById(1)).thenReturn(testUrl);
             mockedCheckService.when(() -> UrlCheckService.urlCheck("https://example.com", 1)).thenReturn(testCheck);
-            
+
             UrlController.checkUrl(ctx);
-            
+
             verify(ctx).redirect("/urls");
             mockedCheckRepo.verify(() -> UrlCheckRepository.save(testCheck));
         }
@@ -304,18 +309,18 @@ public final class UrlControllerTest {
     public void createUrlDuplicateTest() {
         try (MockedStatic<UrlRepository> mockedRepo = mockStatic(UrlRepository.class)) {
             Validator<String> mockValidator = mock(Validator.class);
-            
+
             when(mockValidator.get()).thenReturn("https://example.com");
             when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
-            
+
             ValidationException validationException = new ValidationException(Map.of());
             when(mockValidator.check(any(), anyString())).thenThrow(validationException);
-            
+
             when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
             when(ctx.formParam("url")).thenReturn("https://example.com");
-            
+
             UrlController.createUrl(ctx);
-            
+
             verify(ctx).render(eq("urls/build.jte"), any(Map.class));
         }
     }
@@ -330,13 +335,13 @@ public final class UrlControllerTest {
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
 
         UrlController.createUrl(ctx);
-        
+
         verify(ctx).status(HttpStatus.CREATED);
         verify(ctx).redirect("/urls");
         verify(ctx).sessionAttribute("flash", "Url has been created!");
     }
 
-    @Test 
+    @Test
     public void createUrlHttpsTest() {
         Validator<String> mockValidator = mock(Validator.class);
         String testUrl = "https://secure-example.com";
@@ -345,6 +350,124 @@ public final class UrlControllerTest {
         when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
         when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
 
+        UrlController.createUrl(ctx);
+
+        verify(ctx).status(HttpStatus.CREATED);
+        verify(ctx).redirect("/urls");
+        verify(ctx).sessionAttribute("flash", "Url has been created!");
+    }
+
+    @Test
+    public void createUrlInvalidUrlTest() {
+        Validator<String> mockValidator = mock(Validator.class);
+        
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(mockValidator.check(any(), anyString())).thenThrow(new ValidationException(Map.of()));
+        when(ctx.formParam("url")).thenReturn("invalid-url");
+        
+        UrlController.createUrl(ctx);
+        
+        verify(ctx).render(eq("urls/build.jte"), any(Map.class));
+    }
+
+    @Test
+    public void createUrlNotUniqueTest() {
+        try (MockedStatic<UrlRepository> mockedRepo = mockStatic(UrlRepository.class)) {
+            Validator<String> mockValidator = mock(Validator.class);
+            String existingUrl = "https://existing.com";
+            
+            when(mockValidator.get()).thenReturn(existingUrl);
+            when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+            when(mockValidator.check(any(), anyString())).thenThrow(new ValidationException(Map.of()));
+            when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+            when(ctx.formParam("url")).thenReturn(existingUrl);
+            
+            mockedRepo.when(() -> UrlRepository.isUrlExistsByName(existingUrl)).thenReturn(true);
+            
+            UrlController.createUrl(ctx);
+            
+            verify(ctx).render(eq("urls/build.jte"), any(Map.class));
+        }
+    }
+
+    @Test
+    public void createUrlTestValidationChain() {
+        Validator<String> mockValidator = mock(Validator.class);
+        String validUrl = "https://example.com/test";
+
+        // Test the validation chain by having the validator succeed through all checks
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(mockValidator.get()).thenReturn(validUrl);
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+
+        UrlController.createUrl(ctx);
+
+        verify(ctx).status(HttpStatus.CREATED);
+        verify(ctx).redirect("/urls");
+        verify(ctx).sessionAttribute("flash", "Url has been created!");
+    }
+
+    @Test
+    public void createUrlWithSpecialPortTest() {
+        Validator<String> mockValidator = mock(Validator.class);
+        String urlWithPort = "http://example.com:9999/path";
+        
+        when(mockValidator.get()).thenReturn(urlWithPort);
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        
+        UrlController.createUrl(ctx);
+        
+        verify(ctx).status(HttpStatus.CREATED);
+        verify(ctx).redirect("/urls");
+        verify(ctx).sessionAttribute("flash", "Url has been created!");
+    }
+
+    @Test
+    public void createUrlWithNormalizationTest() {
+        // Test URL normalization with different port scenarios
+        Validator<String> mockValidator = mock(Validator.class);
+        String urlWithPath = "https://example.org:443/some/path?query=value";
+        
+        when(mockValidator.get()).thenReturn(urlWithPath);
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        
+        UrlController.createUrl(ctx);
+        
+        verify(ctx).status(HttpStatus.CREATED);
+        verify(ctx).redirect("/urls");
+        verify(ctx).sessionAttribute("flash", "Url has been created!");
+    }
+
+    @Test  
+    public void createUrlWithoutPortTest() {
+        // Test URL without explicit port to test normalizeUrl branch
+        Validator<String> mockValidator = mock(Validator.class);
+        String urlWithoutPort = "https://example.org/path";
+        
+        when(mockValidator.get()).thenReturn(urlWithoutPort);
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        
+        UrlController.createUrl(ctx);
+        
+        verify(ctx).status(HttpStatus.CREATED);
+        verify(ctx).redirect("/urls");
+        verify(ctx).sessionAttribute("flash", "Url has been created!");
+    }
+
+    @Test
+    public void createUrlEdgeCaseTest() {
+        // Test another URL variation to increase coverage
+        Validator<String> mockValidator = mock(Validator.class);
+        String urlEdgeCase = "http://test.example.co.uk:80";
+        
+        when(mockValidator.get()).thenReturn(urlEdgeCase);
+        when(mockValidator.check(any(), anyString())).thenReturn(mockValidator);
+        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        
         UrlController.createUrl(ctx);
         
         verify(ctx).status(HttpStatus.CREATED);
