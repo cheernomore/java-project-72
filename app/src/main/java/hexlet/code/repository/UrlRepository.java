@@ -86,6 +86,35 @@ public class UrlRepository {
         }
     }
 
+    public static Url findByName(String name) {
+        var sql =
+                """
+                    SELECT * FROM urls WHERE name = ?
+                """;
+
+        try (Connection conn = DatabaseConnection.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, name);
+            ResultSet resultSet = stmt.executeQuery();
+
+            if (resultSet.next()) {
+                Url url = new Url();
+                url.setId(resultSet.getInt("id"));
+                url.setName(resultSet.getString("name"));
+
+                log.info("Successfully found url with name: {}", name);
+                return url;
+            } else {
+                log.info("No url found with name: {}", name);
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get url: ", e);
+            throw new RuntimeException("Failed to get url", e);
+        }
+    }
+
     public static boolean isUrlExistsByName(String urlName) {
         var sql =
                 """

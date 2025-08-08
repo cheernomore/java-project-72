@@ -7,7 +7,7 @@ import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
-import hexlet.code.services.UrlCheckService;
+import hexlet.code.service.UrlCheckService;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.validation.ValidationException;
@@ -60,7 +60,7 @@ public class UrlController {
     }
 
     public static void show(Context ctx) {
-        var id = ctx.pathParamAsClass("{id}", Integer.class).get();
+        var id = ctx.pathParamAsClass("id", Integer.class).get();
         var url = UrlRepository.findById(id);
 
         var urlChecks = UrlCheckRepository.findAllById(id);

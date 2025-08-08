@@ -1,4 +1,4 @@
-package hexlet.code.services;
+package hexlet.code.service;
 
 import hexlet.code.model.UrlCheck;
 import kong.unirest.core.Unirest;
