@@ -20,7 +20,11 @@
             <table class="table table-striped-columns">
                 <thead>
                 <tr>
-                    <th scope="col">#</th>
+                    <th scope="col">id</th>
+                    <th scope="col">status code</th>
+                    <th scope="col">title</th>
+                    <th scope="col">h1</th>
+                    <th scope="col">description</th>
                     <th scope="col">checked at</th>
                 </tr>
                 </thead>
@@ -29,6 +33,10 @@
                 @for(var urlCheck : page.getUrlCheckList())
                     <tr>
                         <th scope="row">${urlCheck.getId()}</th>
+                        <td>${String.valueOf(urlCheck.getStatusCode())}</td>
+                        <td>${String.valueOf(urlCheck.getTitle())}</td>
+                        <td>${String.valueOf(urlCheck.getH1())}</td>
+                        <td>${String.valueOf(urlCheck.getDescription())}</td>
                         <td>${String.valueOf(urlCheck.getCreatedAt())}</td>
                     </tr>
                 @endfor

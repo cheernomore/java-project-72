@@ -20,7 +20,7 @@ public class UrlCheckService {
         urlCheck.setStatusCode(statusCode);
         urlCheck.setH1(getElementValueOrNull(doc, "h1"));
         urlCheck.setTitle(getElementValueOrNull(doc, "title"));
-        urlCheck.setDescription(getElementValueOrNull(doc, "description"));
+        urlCheck.setDescription(getElementValueOrNull(doc, "meta[name=\"description\"]"));
         urlCheck.setUrlId(id);
 
         return urlCheck;
