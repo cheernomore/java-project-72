@@ -19,7 +19,7 @@ public class UrlRepository {
             throw new IllegalArgumentException("URL and URL name cannot be null");
         }
 
-        String sql = "INSERT INTO urls(name) VALUES (?)";
+        String sql = "INSERT INTO urls(name, created_at) VALUES (?, DEFAULT)";
 
         try (Connection conn = DatabaseConnection.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

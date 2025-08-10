@@ -20,7 +20,8 @@ public class UrlCheckRepository {
 
         var sql =
                 """
-                INSERT INTO url_checks(status_code, title, h1, description, url_id) VALUES (?, ?, ?, ?, ?)
+                INSERT INTO url_checks(status_code, title, h1, description, url_id, created_at)
+                VALUES (?, ?, ?, ?, ?, DEFAULT)
                 """;
 
         try (
@@ -42,7 +43,7 @@ public class UrlCheckRepository {
         }
     }
 
-    public static List<UrlCheck> findAllById(int id) {
+    public static List<UrlCheck> findAllByUrlId(int id) {
         var urlChecks = new ArrayList<UrlCheck>();
         var sql =
                 """

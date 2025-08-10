@@ -80,23 +80,18 @@ sonar {
         property("sonar.organization", "cheernomore")  // замените на вашу
         property("sonar.host.url", "https://sonarcloud.io")
 
-        // Пути к исходникам
         property("sonar.sources", "src/main/java")
         property("sonar.tests", "src/test/java")
 
-        // КЛЮЧЕВОЕ: путь к JaCoCo отчету
         property("sonar.coverage.jacoco.xmlReportPaths",
             "build/reports/jacoco/test/jacocoTestReport.xml")
 
-        // Дополнительные настройки
         property("sonar.java.coveragePlugin", "jacoco")
         property("sonar.java.binaries", "build/classes")
         property("sonar.java.test.binaries", "build/classes")
     }
 }
 
-
-// Связываем задачи
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)

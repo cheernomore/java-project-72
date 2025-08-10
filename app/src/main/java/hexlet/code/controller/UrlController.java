@@ -63,7 +63,7 @@ public class UrlController {
         var id = ctx.pathParamAsClass("id", Integer.class).get();
         var url = UrlRepository.findById(id);
 
-        var urlChecks = UrlCheckRepository.findAllById(id);
+        var urlChecks = UrlCheckRepository.findAllByUrlId(id);
 
         var page = new UrlPage(url, urlChecks);
 
