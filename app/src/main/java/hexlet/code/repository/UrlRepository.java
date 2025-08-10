@@ -9,7 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,12 +23,13 @@ public class UrlRepository {
         }
 
         String sql = "INSERT INTO urls(name, created_at) VALUES (?, ?)";
+        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 
         try (Connection conn = DatabaseConnection.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, url.getName());
-            stmt.setTimestamp(2, Timestamp.from(Instant.now()));
+            stmt.setTimestamp(2, timestamp);
 
             stmt.executeUpdate();
             log.info("Successfully saved URL: {}", url.getName());

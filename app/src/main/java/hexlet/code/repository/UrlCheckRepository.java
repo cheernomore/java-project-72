@@ -8,7 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class UrlCheckRepository {
                 INSERT INTO url_checks(status_code, title, h1, description, url_id, created_at)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
+        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 
         try (
                 Connection connection = DatabaseConnection.getDataSource().getConnection();
@@ -36,7 +38,7 @@ public class UrlCheckRepository {
             stmt.setString(3, urlCheck.getH1());
             stmt.setString(4, urlCheck.getDescription());
             stmt.setInt(5, urlCheck.getUrlId());
-            stmt.setTimestamp(6, Timestamp.from(Instant.now()));
+            stmt.setTimestamp(6, timestamp);
 
             stmt.executeUpdate();
             log.info("Successfully saved UrlCheck with title: {}", urlCheck.getTitle());
