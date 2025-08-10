@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class UrlCheckRepository {
         var sql =
                 """
                 INSERT INTO url_checks(status_code, title, h1, description, url_id, created_at)
-                VALUES (?, ?, ?, ?, ?, DEFAULT)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         try (
@@ -34,6 +36,7 @@ public class UrlCheckRepository {
             stmt.setString(3, urlCheck.getH1());
             stmt.setString(4, urlCheck.getDescription());
             stmt.setInt(5, urlCheck.getUrlId());
+            stmt.setTimestamp(6, Timestamp.from(Instant.now()));
 
             stmt.executeUpdate();
             log.info("Successfully saved UrlCheck with title: {}", urlCheck.getTitle());

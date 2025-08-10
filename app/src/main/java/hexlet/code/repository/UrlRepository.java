@@ -4,10 +4,12 @@ import hexlet.code.db.DatabaseConnection;
 import hexlet.code.model.Url;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Timestamp;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Connection;
 import java.sql.ResultSet;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,12 +21,14 @@ public class UrlRepository {
             throw new IllegalArgumentException("URL and URL name cannot be null");
         }
 
-        String sql = "INSERT INTO urls(name, created_at) VALUES (?, DEFAULT)";
+        String sql = "INSERT INTO urls(name, created_at) VALUES (?, ?)";
 
         try (Connection conn = DatabaseConnection.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, url.getName());
+            stmt.setTimestamp(2, Timestamp.from(Instant.now()));
+
             stmt.executeUpdate();
             log.info("Successfully saved URL: {}", url.getName());
         } catch (SQLException e) {
