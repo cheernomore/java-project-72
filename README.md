@@ -20,7 +20,7 @@ SEO Validator — это веб-приложение для анализа и в
 4. Получите отчет с рекомендациями по улучшению SEO.
 
 ## Технологии
-- **Backend:** Java, Spring Boot
+- **Backend:** Java
 - **Frontend:** HTML, CSS, JavaScript
 - **База данных:** PostgreSQL
 - **Сборка и управление зависимостями:** Gradle

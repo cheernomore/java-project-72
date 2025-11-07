@@ -1,1 +1,9 @@
-/.idea
+# Gradle
+app/.gradle
+app/build/
+
+# IDE
+.idea/
+
+# DB
+*.db

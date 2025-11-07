@@ -1,15 +1,12 @@
 FROM eclipse-temurin:21-jdk
-
-WORKDIR /app
-
-COPY app/ ./
-
+WORKDIR app
+COPY app ./
 
 RUN ./gradlew --no-daemon shadowJar
 
-ENV PORT=8080
-ENV JDBC_DATABASE_URL=jdbc:postgresql://dpg-d2ad0j1r0fns7398jmg0-a:5432/java_project_72_postgres_l9an
-ENV JDBC_DATABASE_USERNAME=java_project_72_postgres_user
-ENV JDBC_DATABASE_PASSWORD=qUjBA8KJR08EYh1lufYddurprpZtruJO
+ENV PORT=${PORT}
+ENV JDBC_DATABASE_URL=${JDBC_DATABASE_URL}
+ENV JDBC_DATABASE_USERNAME=${JDBC_DATABASE_USERNAME}
+ENV JDBC_DATABASE_PASSWORD=${JDBC_DATABASE_PASSWORD}
 
-CMD java -jar build/libs/app-1.0-SNAPSHOT-all.jar
+CMD java -jar build/libs/app.jar

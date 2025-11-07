@@ -8,7 +8,6 @@ plugins {
 }
 
 group = "hexlet.code"
-version = "1.0-SNAPSHOT"
 
 val javalinVersion = "6.7.0"
 val pangolinVersion = "42.7.2"
@@ -51,6 +50,10 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
+tasks.shadowJar {
+    archiveBaseName = "app"
+}
+
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
@@ -77,14 +80,13 @@ tasks.jacocoTestCoverageVerification {
 sonar {
     properties {
         property("sonar.projectKey", "cheernomore_java-project-72")
-        property("sonar.organization", "cheernomore")  // замените на вашу
+        property("sonar.organization", "cheernomore")
         property("sonar.host.url", "https://sonarcloud.io")
 
         property("sonar.sources", "src/main/java")
         property("sonar.tests", "src/test/java")
 
-        property("sonar.coverage.jacoco.xmlReportPaths",
-            "build/reports/jacoco/test/jacocoTestReport.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
 
         property("sonar.java.coveragePlugin", "jacoco")
         property("sonar.java.binaries", "build/classes")
