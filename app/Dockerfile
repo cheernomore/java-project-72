@@ -1,12 +1,5 @@
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre
 WORKDIR app
-COPY app ./
-
+COPY app .
 RUN ./gradlew --no-daemon shadowJar
-
-ENV PORT=${PORT}
-ENV JDBC_DATABASE_URL=${JDBC_DATABASE_URL}
-ENV JDBC_DATABASE_USERNAME=${JDBC_DATABASE_USERNAME}
-ENV JDBC_DATABASE_PASSWORD=${JDBC_DATABASE_PASSWORD}
-
 CMD java -jar build/libs/app.jar
