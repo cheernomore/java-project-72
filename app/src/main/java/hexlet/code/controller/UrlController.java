@@ -12,6 +12,8 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.validation.ValidationException;
 import kong.unirest.core.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
+
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 import java.net.MalformedURLException;
@@ -19,51 +21,57 @@ import java.net.URL;
 import java.net.URI;
 import java.util.HashMap;
 
+@Slf4j
 public class UrlController {
 
     public static void buildUrl(Context ctx) {
-        var page = new UrlBuildPage();
-        ctx.render("urls/build.jte", model("page", page));
+        UrlBuildPage urlBuildPage = new UrlBuildPage();
+        ctx.render("urls/build.jte", model("page", urlBuildPage));
     }
 
     public static void createUrl(Context ctx) {
+        UrlBuildPage urlBuildPage = new UrlBuildPage();
+        String inputUrl;
+        URL parsedUrl;
 
         try {
-            var urlName = ctx.formParamAsClass("url", String.class)
+            inputUrl = ctx.formParamAsClass("url", String.class)
                     .check(value -> !value.isEmpty(), "Url не должен быть пустым")
-                    .check(UrlController::isValidUrl, "Некорректный URL")
-                    .check(UrlController::isUnique, "URL должен быть уникальным")
+                    .check(UrlRepository::isUrlExistsByName, "URL должен быть уникальным")
                     .get();
+        } catch (ValidationException e) {
+            log.error("Url заполнен не корректно", e);
 
-            var parsedUrl = URI.create(urlName).toURL();
+            urlBuildPage.setErrors(e.getErrors());
+            urlBuildPage.setFlash("Ошибка!");
+            ctx.render("urls/build.jte", model("page", urlBuildPage));
+            return;
+        }
 
-            var url = new Url();
+        try {
+            parsedUrl = URI.create(inputUrl).toURL();
+
+            Url url = new Url();
             url.setName(normalizeUrl(parsedUrl));
             UrlRepository.save(url);
 
             ctx.sessionAttribute("flash", "Url has been created!");
             ctx.status(HttpStatus.CREATED);
             ctx.redirect(NamedRoutes.urlsPath());
-        } catch (ValidationException e) {
-            var urlName = ctx.formParam("url");
-            var page = new UrlBuildPage(urlName, e.getErrors());
 
-            ctx.render("urls/build.jte", model("page", page));
         } catch (MalformedURLException e) {
-            var urlName = ctx.formParam("url");
-            var page = new UrlBuildPage();
+            log.error("Url is not correct: {}", inputUrl, e);
 
-            ctx.sessionAttribute("flash", urlName + " not correct");
-
-            ctx.render("urls/build.jte", model("page", page));
+            ctx.sessionAttribute("flash", inputUrl + " is not correct");
+            ctx.render("urls/build.jte", model("page", urlBuildPage));
         }
     }
 
     public static void show(Context ctx) {
-        var id = ctx.pathParamAsClass("id", Integer.class).get();
-        var url = UrlRepository.findById(id);
+        int id = ctx.pathParamAsClass("id", Integer.class).get();
+        var url = UrlRepository.findById(id).orElseThrow();
 
-        var urlChecks = UrlCheckRepository.findAllByUrlId(id);
+        var urlChecks = UrlCheckRepository.findAllByUrlId(id).orElseThrow();
 
         var page = new UrlPage(url, urlChecks);
 
@@ -72,9 +80,9 @@ public class UrlController {
 
     public static void showUrls(Context ctx) {
         var urlChecks = new HashMap<Integer, UrlCheck>();
-        var urls = UrlRepository.getAllUrls();
+        var urls = UrlRepository.getAllUrls().orElseThrow();
 
-        urls.forEach(url -> urlChecks.put(url.getId(), UrlCheckRepository.findById(url.getId())));
+        urls.forEach(url -> urlChecks.put(url.getId(), UrlCheckRepository.findById(url.getId()).orElseThrow()));
 
         var page = new UrlsPage(urls, urlChecks);
 
@@ -87,7 +95,7 @@ public class UrlController {
     public static void checkUrl(Context ctx) {
         HttpResponse<String> response;
         var id = ctx.pathParamAsClass("id", Integer.class).get();
-        var url = UrlRepository.findById(id);
+        var url = UrlRepository.findById(id).orElseThrow();
 
         if (url == null) {
             System.out.println();
@@ -95,16 +103,7 @@ public class UrlController {
             var urlCheck = UrlCheckService.urlCheck(url.getName(), url.getId());
 
             UrlCheckRepository.save(urlCheck);
-            ctx.redirect(NamedRoutes.urlsPath());
-        }
-    }
-
-    private static boolean isValidUrl(String url) {
-        try {
-            URI.create(url).toURL();
-            return true;
-        } catch (Exception e) {
-            return false;
+            ctx.redirect(NamedRoutes.urlPath(String.valueOf(id)));
         }
     }
 

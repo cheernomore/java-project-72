@@ -6,7 +6,4 @@ public final class DatabaseConfig {
     public static final String POSTGRES_DRIVER = "org.postgresql.Driver";
     public static final String DEFAULT_H2_USER = "test";
     public static final String DEFAULT_H2_PASSWORD = "";
-
-    private DatabaseConfig() {
-    }
 }

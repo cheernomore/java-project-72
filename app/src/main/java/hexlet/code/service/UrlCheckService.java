@@ -2,38 +2,40 @@ package hexlet.code.service;
 
 import hexlet.code.model.UrlCheck;
 import kong.unirest.core.Unirest;
+import kong.unirest.core.UnirestException;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 public class UrlCheckService {
 
     public static UrlCheck urlCheck(String urlName, int id) {
+        try {
+            var response = Unirest
+                    .get(urlName)
+                    .asString();
 
-        var response = Unirest
-                .get(urlName)
-                .asString();
+            var doc = Jsoup.parse(response.getBody());
+            var statusCode = response.getStatus();
 
-        var doc = Jsoup.parse(response.getBody());
-        var statusCode = response.getStatus();
+            var h1Element = doc.selectFirst("h1");
+            var h1 = h1Element != null ? h1Element.text() : null;
 
-        var urlCheck = new UrlCheck();
-        urlCheck.setStatusCode(statusCode);
-        urlCheck.setH1(getElementText(doc, "h1"));
-        urlCheck.setTitle(getElementText(doc, "title"));
-        urlCheck.setDescription(getMetaContent(doc, "meta[name=\"description\"]"));
-        urlCheck.setUrlId(id);
+            var titleElement = doc.selectFirst("title");
+            var title = titleElement != null ? titleElement.text() : null;
 
-        return urlCheck;
-    }
+            var descriptionElement = doc.selectFirst("meta[name=\"description\"]");
+            var description = descriptionElement != null ? descriptionElement.attr("content") : null;
 
-    private static String getElementText(Document doc, String selector) {
-        Element element = doc.selectFirst(selector);
-        return element != null ? element.text().trim() : null;
-    }
+            var urlCheck = UrlCheck.builder();
+            urlCheck
+                    .urlId(id)
+                    .h1(h1)
+                    .title(title)
+                    .description(description)
+                    .statusCode(statusCode);
 
-    private static String getMetaContent(Document doc, String selector) {
-        Element element = doc.selectFirst(selector);
-        return element != null ? element.attr("content").trim() : null;
+            return urlCheck.build();
+        } catch (UnirestException e) {
+            throw new UnirestException("Unirest Exception:", e);
+        }
     }
 }

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class UrlRepository {
@@ -39,7 +40,7 @@ public class UrlRepository {
         }
     }
 
-    public static List<Url> getAllUrls() {
+    public static Optional<List<Url>> getAllUrls() {
         var urls = new ArrayList<Url>();
         var sql = "SELECT * FROM urls";
 
@@ -56,14 +57,14 @@ public class UrlRepository {
                 urls.add(url);
             }
             log.info("Successfully get urls: ");
-            return urls;
+            return Optional.of(urls);
         } catch (SQLException e) {
             log.error("Failed to get urls: ", e);
             throw new RuntimeException("Failed to get urls", e);
         }
     }
 
-    public static Url findById(int id) {
+    public static Optional<Url> findById(int id) {
         var sql =
             """
                 SELECT * FROM urls WHERE urls.id = ?
@@ -81,10 +82,10 @@ public class UrlRepository {
                 url.setName(resultSet.getString("name"));
 
                 log.info("Successfully found url with id: {}", id);
-                return url;
+                return Optional.of(url);
             } else {
                 log.info("No url found with id: {}", id);
-                return null;
+                return Optional.empty();
             }
         } catch (SQLException e) {
             log.error("Failed to get url: ", e);
@@ -92,7 +93,7 @@ public class UrlRepository {
         }
     }
 
-    public static Url findByName(String name) {
+    public static Optional<Url> findByName(String name) {
         var sql =
                 """
                     SELECT * FROM urls WHERE name = ?
@@ -110,10 +111,10 @@ public class UrlRepository {
                 url.setName(resultSet.getString("name"));
 
                 log.info("Successfully found url with name: {}", name);
-                return url;
+                return Optional.of(url);
             } else {
                 log.info("No url found with name: {}", name);
-                return null;
+                return Optional.empty();
             }
         } catch (SQLException e) {
             log.error("Failed to get url: ", e);

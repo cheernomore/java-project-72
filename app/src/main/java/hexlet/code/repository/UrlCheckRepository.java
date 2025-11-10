@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class UrlCheckRepository {
@@ -48,7 +49,7 @@ public class UrlCheckRepository {
         }
     }
 
-    public static List<UrlCheck> findAllByUrlId(int id) {
+    public static Optional<List<UrlCheck>> findAllByUrlId(int id) {
         var urlChecks = new ArrayList<UrlCheck>();
         var sql =
                 """
@@ -64,26 +65,26 @@ public class UrlCheckRepository {
             var rs = stmt.executeQuery();
 
             while (rs.next()) {
-                var urlCheck = new UrlCheck();
+                var urlCheck = UrlCheck.builder();
 
-                urlCheck.setId(rs.getInt("id"));
-                urlCheck.setStatusCode(rs.getInt("status_code"));
-                urlCheck.setH1(rs.getString("h1"));
-                urlCheck.setTitle(rs.getString("title"));
-                urlCheck.setDescription(rs.getString("description"));
-                urlCheck.setCreatedAt(rs.getTimestamp("created_at"));
+                urlCheck.urlId(rs.getInt("id"))
+                        .statusCode(rs.getInt("status_code"))
+                        .h1(rs.getString("h1"))
+                        .title(rs.getString("title"))
+                        .description(rs.getString("description"))
+                        .createdAt(rs.getTimestamp("created_at").toInstant())
+                        .build();
 
-                urlChecks.add(urlCheck);
+                urlChecks.add(urlCheck.build());
             }
 
-            return urlChecks;
+            return Optional.of(urlChecks);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get url checks", e);
         }
     }
 
-    public static UrlCheck findById(int id) {
-        var urlCheck = new UrlCheck();
+    public static Optional<UrlCheck> findById(int id) {
         var sql =
                 """
                     SELECT *
@@ -96,19 +97,21 @@ public class UrlCheckRepository {
                 Connection connection = DatabaseConnection.getDataSource().getConnection();
                 PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
+            var urlCheck = UrlCheck.builder();
             stmt.setInt(1, id);
             var rs = stmt.executeQuery();
 
             if (rs.next()) {
-                urlCheck.setId(rs.getInt("id"));
-                urlCheck.setStatusCode(rs.getInt("status_code"));
-                urlCheck.setH1(rs.getString("h1"));
-                urlCheck.setTitle(rs.getString("title"));
-                urlCheck.setDescription(rs.getString("description"));
-                urlCheck.setCreatedAt(rs.getTimestamp("created_at"));
+                urlCheck.urlId(rs.getInt("id"))
+                        .statusCode(rs.getInt("status_code"))
+                        .h1(rs.getString("h1"))
+                        .title(rs.getString("title"))
+                        .description(rs.getString("description"))
+                        .createdAt(rs.getTimestamp("created_at").toInstant())
+                        .build();
             }
 
-            return urlCheck;
+            return Optional.of(urlCheck.build());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
