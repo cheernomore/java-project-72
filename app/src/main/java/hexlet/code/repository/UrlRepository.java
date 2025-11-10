@@ -123,24 +123,18 @@ public class UrlRepository {
     }
 
     public static boolean isUrlExistsByName(String urlName) {
-        var sql =
-                """
-                    SELECT EXISTS(SELECT * FROM urls WHERE urls.name = ?)
-                """;
+        var sql = "SELECT EXISTS(SELECT 1 FROM urls WHERE name = ?)";
 
-        try (
-                Connection conn = DatabaseConnection.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ) {
+        try (Connection conn = DatabaseConnection.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
             stmt.setString(1, urlName);
-            var rs = stmt.executeQuery();
+            return rs.next() && rs.getBoolean(1);
 
-            if (rs.next()) {
-                return rs.getBoolean(1);
-            }
         } catch (SQLException e) {
             log.error("Ошибка при проверке существования URL: {}", urlName, e);
-            throw new RuntimeException("Ошибка при работе с базой данных");
+            throw new RuntimeException("Ошибка при работе с базой данных", e);
         }
     }
 }
