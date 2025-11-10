@@ -36,8 +36,8 @@ public class UrlController {
 
         try {
             inputUrl = ctx.formParamAsClass("url", String.class)
-                    .check(value -> !value.isEmpty(), "Url не должен быть пустым")
-                    .check(UrlRepository::isUrlExistsByName, "URL должен быть уникальным")
+                    .check(value -> !value.isBlank(), "Url не должен быть пустым")
+                    .check(value -> !UrlRepository.isUrlExistsByName(value), "URL должен быть уникальным")
                     .get();
         } catch (ValidationException e) {
             log.error("Url заполнен не корректно", e);

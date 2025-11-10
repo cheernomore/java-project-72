@@ -138,7 +138,6 @@ public class UrlRepository {
             if (rs.next()) {
                 return rs.getBoolean(1);
             }
-            return false;
         } catch (SQLException e) {
             log.error("Ошибка при проверке существования URL: {}", urlName, e);
             throw new RuntimeException("Ошибка при работе с базой данных");
