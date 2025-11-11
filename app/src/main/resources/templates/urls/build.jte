@@ -4,17 +4,72 @@
 
 @template.layout.page(
 content = @`
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <form action="/urls" method="post">
-                    <div class="mb-3">
-                        <label for="urlId" class="form-label">URL</label>
-                        <input name="url" type="text" class="form-control" value="${page.getName()}" id="urlId" aria-describedby="urlHelp">
-                        <div id="urlHelp" class="form-text">Просто воткни ссылку</div>
+    <div class="hero-section mb-5">
+        <h1 class="display-4 fw-bold mb-3">SEO Анализатор сайтов</h1>
+        <p class="lead">Проверяйте доступность сайтов и анализируйте их SEO-параметры</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">
+                        <i class="bi bi-plus-circle text-primary me-2"></i>
+                        Добавить новый сайт
+                    </h2>
+
+                    <form action="/urls" method="post" id="addUrlForm">
+                        <div class="mb-4">
+                            <label for="urlId" class="form-label fw-semibold">
+                                URL адрес сайта <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-globe"></i>
+                                </span>
+                                <input
+                                    name="url"
+                                    type="url"
+                                    class="form-control form-control-lg"
+                                    value="${page.getName()}"
+                                    id="urlId"
+                                    placeholder="https://example.com"
+                                    aria-describedby="urlHelp"
+                                    required
+                                    pattern="https?://.*"
+                                    title="Введите корректный URL, начинающийся с http:// или https://">
+                            </div>
+                            <div id="urlHelp" class="form-text mt-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Введите полный URL адрес включая протокол (http:// или https://)
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-search me-2"></i>
+                                Проверить сайт
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-lightbulb text-warning me-2"></i>
+                            Как это работает?
+                        </h5>
+                        <ol class="mb-0">
+                            <li>Введите URL сайта, который хотите проверить</li>
+                            <li>Система выполнит проверку доступности сайта</li>
+                            <li>Получите информацию о SEO-параметрах: title, h1, description</li>
+                            <li>Отслеживайте историю всех проверок</li>
+                        </ol>
                     </div>
-                    <button type="submit" class="btn btn-primary">Добавить URL</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>

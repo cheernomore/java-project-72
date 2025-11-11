@@ -6,42 +6,104 @@
 
 @template.layout.page(
     content = @`
-        <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <table class="table table-striped-columns">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Urls</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Checked at</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                    @for(Url url : page.getUrls())
-                        <tr>
-                            <th scope="row">${url.getId()}</th>
-                            <td>
-                                <a href="${NamedRoutes.handleUrlPath(url.getId())}">
-                                    ${url.getName()}
-                                </a>
-                            </td>
-                            @if(page.getUrlChecks().isEmpty() || page.getUrlChecks().get(url.getId()).getStatusCode() == 0)
-                                <td>Проверки не проводились</td>
-                                <td></td>
-                            @else
-                                <td>${page.getUrlChecks().get(url.getId()).getStatusCode()}</td>
-                                <td>${String.valueOf(page.getUrlChecks().get(url.getId()).getCreatedAt())}</td>
-                            @endif
-                        </tr>
-                    @endfor
-                    </tbody>
-                </table>
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5">
+                    <i class="bi bi-list-check text-primary me-2"></i>
+                    Список проверенных сайтов
+                </h1>
+                <p class="text-muted">Всего сайтов: ${page.getUrls().size()}</p>
+            </div>
+            <div class="col-auto">
+                <a href="/urls/build" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Добавить сайт
+                </a>
             </div>
         </div>
-    </div>
+
+        @if(page.getUrls().isEmpty())
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                Список сайтов пуст. <a href="/urls/build" class="alert-link">Добавьте первый сайт</a> для начала работы.
+            </div>
+        @else
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" width="60">ID</th>
+                                    <th scope="col">Сайт</th>
+                                    <th scope="col" width="150">Статус</th>
+                                    <th scope="col" width="200">Последняя проверка</th>
+                                    <th scope="col" width="100">Действия</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            @for(Url url : page.getUrls())
+                                <tr class="align-middle">
+                                    <th scope="row">
+                                        <span class="badge bg-secondary">${url.getId()}</span>
+                                    </th>
+                                    <td>
+                                        <a href="${NamedRoutes.handleUrlPath(url.getId())}" class="text-decoration-none fw-semibold">
+                                            <i class="bi bi-link-45deg me-1"></i>
+                                            ${url.getName()}
+                                        </a>
+                                    </td>
+                                    @if(page.getUrlChecks().isEmpty() || page.getUrlChecks().get(url.getId()) == null || page.getUrlChecks().get(url.getId()).getStatusCode() == 0)
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-clock me-1"></i>
+                                                Не проверялся
+                                            </span>
+                                        </td>
+                                        <td class="text-muted">—</td>
+                                    @else
+                                        !{var statusCode = page.getUrlChecks().get(url.getId()).getStatusCode();}
+                                        <td>
+                                            @if(statusCode >= 200 && statusCode < 300)
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                    ${statusCode}
+                                                </span>
+                                            @elseif(statusCode >= 400 && statusCode < 500)
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    ${statusCode}
+                                                </span>
+                                            @elseif(statusCode >= 500)
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-x-circle me-1"></i>
+                                                    ${statusCode}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary">${statusCode}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar-check me-1"></i>
+                                                ${String.valueOf(page.getUrlChecks().get(url.getId()).getCreatedAt())}
+                                            </small>
+                                        </td>
+                                    @endif
+                                    <td>
+                                        <a href="${NamedRoutes.handleUrlPath(url.getId())}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endfor
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         @if(page.getFlash() != null)
         <!-- Флеш-уведомление справа сверху -->
