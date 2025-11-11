@@ -31,7 +31,7 @@ content = @`
                                     name="url"
                                     type="url"
                                     class="form-control form-control-lg"
-                                    value="${page.getName()}"
+                                    value="${page.getName() != null ? page.getName() : ""}"
                                     id="urlId"
                                     placeholder="https://example.com"
                                     aria-describedby="urlHelp"
