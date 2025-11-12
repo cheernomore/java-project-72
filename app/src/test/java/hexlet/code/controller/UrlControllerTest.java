@@ -14,6 +14,7 @@ import io.javalin.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,12 +47,21 @@ import static org.mockito.Mockito.when;
 public final class UrlControllerTest {
 
     private final Context ctx = mock(Context.class);
-    private Connection connection;
+    private static Connection connection;
     private MockWebServer mockWebServer;
 
     @BeforeAll
-    static void startUp() {
+    static void startUp() throws SQLException {
         DatabaseInitializer.initializeDatabase();
+        connection = DatabaseConnection.getDataSource().getConnection();
+        connection.setAutoCommit(false);
+    }
+
+    @AfterAll
+    static void shutdown() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
     }
 
     @BeforeEach
@@ -64,15 +74,10 @@ public final class UrlControllerTest {
     void tearDown() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.rollback();
-            connection.close();
         }
         if (mockWebServer != null) {
             mockWebServer.close();
         }
-    }
-
-    void initDatabase() throws SQLException {
-        connection = DatabaseConnection.getDataSource().getConnection();
     }
 
     @ParameterizedTest
@@ -83,8 +88,7 @@ public final class UrlControllerTest {
         "http://popolam.ru:8080/path, http://popolam.ru:8080",
         "http://popolam.io:8080/path?queryParam=paramExample, http://popolam.io:8080"
     })
-    public void createUrlTest(String testUrlName, String expectedUrl) throws SQLException {
-        initDatabase();
+    public void createUrlTest(String testUrlName, String expectedUrl) {
         Validator<String> mockValidator = mock(Validator.class);
 
         when(mockValidator.get()).thenReturn(testUrlName);
@@ -108,7 +112,7 @@ public final class UrlControllerTest {
         try (
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
-            stmt.setString(1, testUrlName);
+            stmt.setString(1, expectedUrl);
             var rs = stmt.executeQuery();
 
             while (rs.next()) {
