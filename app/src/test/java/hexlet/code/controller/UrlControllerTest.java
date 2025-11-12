@@ -83,7 +83,7 @@ public final class UrlControllerTest {
         "http://popolam.ru:8080/path, http://popolam.ru:8080",
         "http://popolam.io:8080/path?queryParam=paramExample, http://popolam.io:8080"
     })
-    public void createUrlTest(String testUrlName) throws SQLException {
+    public void createUrlTest(String testUrlName, String expectedUrl) throws SQLException {
         initDatabase();
         Validator<String> mockValidator = mock(Validator.class);
 
@@ -112,7 +112,7 @@ public final class UrlControllerTest {
             var rs = stmt.executeQuery();
 
             while (rs.next()) {
-                assertEquals(testUrlName, rs.getString("name"));
+                assertEquals(expectedUrl, rs.getString("name"));
             }
         } catch (SQLException e) {
             log.error("SQL Exception: ", e);

@@ -61,20 +61,37 @@ tasks.jacocoTestReport {
         html.required.set(true)
         csv.required.set(false)
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                include("**/controller/UrlController.class")
+            }
+        })
+    )
     finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = "CLASS"
             includes = listOf(
                 "hexlet.code.controller.UrlController"
             )
             limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
                 minimum = "0.80".toBigDecimal()
             }
         }
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                include("**/controller/UrlController.class")
+            }
+        })
+    )
 }
 
 sonar {
