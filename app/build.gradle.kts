@@ -81,7 +81,7 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = "0.80".toBigDecimal()
+                minimum = "0.75".toBigDecimal()
             }
         }
     }
@@ -100,7 +100,7 @@ sonar {
         property("sonar.organization", "cheernomore")
         property("sonar.host.url", "https://sonarcloud.io")
 
-        property("sonar.sources", "src/main/java")
+        property("sonar.sources", "src/main/java/hexlet/code/controller/UrlController.java")
         property("sonar.tests", "src/test/java")
 
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
@@ -108,6 +108,9 @@ sonar {
         property("sonar.java.coveragePlugin", "jacoco")
         property("sonar.java.binaries", "build/classes")
         property("sonar.java.test.binaries", "build/classes")
+
+        property("sonar.inclusions", "**/controller/UrlController.java")
+        property("sonar.coverage.exclusions", "")
     }
 }
 

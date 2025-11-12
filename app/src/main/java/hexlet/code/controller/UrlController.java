@@ -97,7 +97,6 @@ public class UrlController {
         var id = ctx.pathParamAsClass("id", Integer.class).get();
         var url = UrlRepository.findById(id).orElseThrow();
 
-        System.out.println();
         var urlCheck = UrlCheckService.urlCheck(url.getName(), url.getId());
 
         UrlCheckRepository.save(urlCheck);
