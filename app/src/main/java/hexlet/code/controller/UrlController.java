@@ -11,7 +11,6 @@ import hexlet.code.service.UrlCheckService;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.validation.ValidationException;
-import kong.unirest.core.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
@@ -40,10 +39,12 @@ public class UrlController {
                     .check(value -> !UrlRepository.isUrlExistsByName(value), "URL должен быть уникальным")
                     .get();
         } catch (ValidationException e) {
+            ctx.status(HttpStatus.BAD_REQUEST);
             log.error("Url заполнен не корректно", e);
 
             urlBuildPage.setErrors(e.getErrors());
             urlBuildPage.setFlash("Ошибка!");
+
             ctx.render("urls/build.jte", model("page", urlBuildPage));
             return;
         }
@@ -93,18 +94,15 @@ public class UrlController {
     }
 
     public static void checkUrl(Context ctx) {
-        HttpResponse<String> response;
         var id = ctx.pathParamAsClass("id", Integer.class).get();
         var url = UrlRepository.findById(id).orElseThrow();
 
-        if (url == null) {
-            System.out.println();
-        } else {
-            var urlCheck = UrlCheckService.urlCheck(url.getName(), url.getId());
+        System.out.println();
+        var urlCheck = UrlCheckService.urlCheck(url.getName(), url.getId());
 
-            UrlCheckRepository.save(urlCheck);
-            ctx.redirect(NamedRoutes.urlPath(String.valueOf(id)));
-        }
+        UrlCheckRepository.save(urlCheck);
+        ctx.redirect(NamedRoutes.urlPath(String.valueOf(id)));
+
     }
 
     private static String normalizeUrl(URL url) {
@@ -113,9 +111,5 @@ public class UrlController {
             result += ":" + url.getPort();
         }
         return result;
-    }
-
-    private static boolean isUnique(String urlName) {
-        return !UrlRepository.isUrlExistsByName(urlName);
     }
 }
