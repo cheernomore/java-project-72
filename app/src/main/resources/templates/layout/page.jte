@@ -118,10 +118,10 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="mb-0 text-muted">© 2024 SEO Анализатор. Все права защищены.</p>
+                        <p class="mb-0 text-muted">© 2025 SEO Анализатор. Hexlet study project.</p>
                     </div>
                     <div class="col-md-6 text-md-end">
-                        <a href="https://github.com" target="_blank" class="text-muted me-3">
+                        <a href="https://github.com/cheernomore/java-project-72?tab=readme-ov-file" target="_blank" class="text-muted me-3">
                             <i class="bi bi-github"></i> GitHub
                         </a>
                         <a href="#" class="text-muted">
