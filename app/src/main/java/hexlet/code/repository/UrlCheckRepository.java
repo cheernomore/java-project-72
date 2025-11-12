@@ -49,7 +49,7 @@ public class UrlCheckRepository {
         }
     }
 
-    public static Optional<List<UrlCheck>> findAllByUrlId(int id) {
+    public static List<UrlCheck> findAllByUrlId(int id) {
         var urlChecks = new ArrayList<UrlCheck>();
         var sql =
                 """
@@ -78,7 +78,7 @@ public class UrlCheckRepository {
                 urlChecks.add(urlCheck.build());
             }
 
-            return Optional.of(urlChecks);
+            return urlChecks;
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get url checks", e);
         }

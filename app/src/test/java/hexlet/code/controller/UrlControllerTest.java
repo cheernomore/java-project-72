@@ -9,7 +9,6 @@ import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.service.UrlCheckService;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-import io.javalin.validation.ValidationException;
 import io.javalin.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import mockwebserver3.MockResponse;
@@ -36,7 +35,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -89,14 +87,7 @@ public final class UrlControllerTest {
         "http://popolam.io:8080/path?queryParam=paramExample, http://popolam.io:8080"
     })
     public void createUrlTest(String testUrlName, String expectedUrl) {
-        Validator<String> mockValidator = mock(Validator.class);
-
-        when(mockValidator.get()).thenReturn(testUrlName);
-        when(mockValidator
-                .check(any(), anyString()))
-                .thenReturn(mockValidator);
-
-        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        when(ctx.formParam("url")).thenReturn(testUrlName);
 
         UrlController.createUrl(ctx);
         verify(ctx).status(HttpStatus.CREATED);
@@ -125,22 +116,12 @@ public final class UrlControllerTest {
 
     @Test
     public void createUrlWithInvalidNameTest() {
-        Validator<String> mockValidator = mock(Validator.class);
-
-        when(mockValidator.get())
-                .thenThrow(new ValidationException(
-                        Map.of("url", List.of()
-                )));
-        when(mockValidator
-                .check(any(), anyString()))
-                .thenReturn(mockValidator);
-
-        when(ctx.formParamAsClass("url", String.class)).thenReturn(mockValidator);
+        when(ctx.formParam("url")).thenReturn("invalid url with spaces");
 
         UrlController.createUrl(ctx);
 
         verify(ctx).status(HttpStatus.BAD_REQUEST);
-
+        verify(ctx).redirect(eq("/urls/build"));
     }
 
     @Test
@@ -160,8 +141,9 @@ public final class UrlControllerTest {
              MockedStatic<UrlCheckRepository> mockedUrlCheckRepo = mockStatic(UrlCheckRepository.class)
         ) {
             mockedUrlRepo.when(() -> UrlRepository.findById(1)).thenReturn(Optional.of(testUrl));
-            mockedUrlCheckRepo.when(() -> UrlCheckRepository.findAllByUrlId(1))
-                    .thenReturn(Optional.of(List.of(testUrlCheck)));
+            mockedUrlCheckRepo
+                    .when(() -> UrlCheckRepository.findAllByUrlId(1))
+                    .thenReturn(List.of(testUrlCheck));
 
             Validator<Integer> mockValidator = mock(Validator.class);
             when(mockValidator.get()).thenReturn(1);
@@ -230,7 +212,7 @@ public final class UrlControllerTest {
                     .createdAt(Instant.now())
                     .build();
 
-            mockedUrlRepo.when(UrlRepository::getAllUrls).thenReturn(Optional.of(urlList));
+            mockedUrlRepo.when(UrlRepository::getAllUrls).thenReturn(urlList);
             mockedUrlCheckRepo.when(() -> UrlCheckRepository.findById(1))
                     .thenReturn(Optional.of(testUrlCheck));
             mockedUrlCheckRepo.when(() -> UrlCheckRepository.findById(2))

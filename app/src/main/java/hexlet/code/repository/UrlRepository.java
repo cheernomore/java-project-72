@@ -40,7 +40,7 @@ public class UrlRepository {
         }
     }
 
-    public static Optional<List<Url>> getAllUrls() {
+    public static List<Url> getAllUrls() {
         var urls = new ArrayList<Url>();
         var sql = "SELECT * FROM urls";
 
@@ -57,7 +57,7 @@ public class UrlRepository {
                 urls.add(url);
             }
             log.info("Successfully get urls: ");
-            return Optional.of(urls);
+            return urls;
         } catch (SQLException e) {
             log.error("Failed to get urls: ", e);
             throw new RuntimeException("Failed to get urls", e);

@@ -1,10 +1,13 @@
 package hexlet.code.db;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Scanner;
 
+@Slf4j
 public class DatabaseInitializer {
 
     public static void initializeDatabase() {
@@ -23,7 +26,7 @@ public class DatabaseInitializer {
                     statement.execute(sql);
                 }
             }
-            System.out.println("База данных инициализирована.");
+            log.info("База данных инициализирована");
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при инициализации БД", e);
         }
