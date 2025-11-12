@@ -55,17 +55,24 @@ public final class UrlControllerTest {
     }
 
     @BeforeEach
-    void setUp() throws IOException, SQLException {
-        connection = DatabaseConnection.getDataSource().getConnection();
+    void setUp() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        connection.rollback();
-        connection.close();
-        mockWebServer.close();
+        if (connection != null && !connection.isClosed()) {
+            connection.rollback();
+            connection.close();
+        }
+        if (mockWebServer != null) {
+            mockWebServer.close();
+        }
+    }
+
+    void initDatabase() throws SQLException {
+        connection = DatabaseConnection.getDataSource().getConnection();
     }
 
     @ParameterizedTest
@@ -76,7 +83,8 @@ public final class UrlControllerTest {
         "http://popolam.ru:8080/path, http://popolam.ru:8080",
         "http://popolam.io:8080/path?queryParam=paramExample, http://popolam.io:8080"
     })
-    public void createUrlTest(String testUrlName) {
+    public void createUrlTest(String testUrlName) throws SQLException {
+        initDatabase();
         Validator<String> mockValidator = mock(Validator.class);
 
         when(mockValidator.get()).thenReturn(testUrlName);
