@@ -125,6 +125,64 @@ public final class UrlControllerTest {
     }
 
     @Test
+    public void createUrlWithEmptyNameTest() {
+        when(ctx.formParam("url")).thenReturn("");
+
+        UrlController.createUrl(ctx);
+
+        verify(ctx).status(HttpStatus.BAD_REQUEST);
+        verify(ctx).redirect(eq("/urls/build"));
+        verify(ctx).sessionAttribute("flash", "URL не должен быть пустым");
+    }
+
+    @Test
+    public void createUrlWithNullNameTest() {
+        when(ctx.formParam("url")).thenReturn(null);
+
+        UrlController.createUrl(ctx);
+
+        verify(ctx).status(HttpStatus.BAD_REQUEST);
+        verify(ctx).redirect(eq("/urls/build"));
+        verify(ctx).sessionAttribute("flash", "URL не должен быть пустым");
+    }
+
+    @Test
+    public void createUrlWithBlankNameTest() {
+        when(ctx.formParam("url")).thenReturn("   ");
+
+        UrlController.createUrl(ctx);
+
+        verify(ctx).status(HttpStatus.BAD_REQUEST);
+        verify(ctx).redirect(eq("/urls/build"));
+        verify(ctx).sessionAttribute("flash", "URL не должен быть пустым");
+    }
+
+    @Test
+    public void createUrlWithMalformedURLTest() {
+        when(ctx.formParam("url")).thenReturn("javascript:alert('xss')");
+
+        UrlController.createUrl(ctx);
+
+        verify(ctx).status(HttpStatus.BAD_REQUEST);
+        verify(ctx).redirect(eq("/urls/build"));
+        verify(ctx).sessionAttribute("flash", "Некорректный URL");
+    }
+
+    @Test
+    public void createUrlDuplicateTest() {
+        Context ctx2 = mock(Context.class);
+
+        when(ctx.formParam("url")).thenReturn("http://example.com");
+        UrlController.createUrl(ctx);
+
+        when(ctx2.formParam("url")).thenReturn("http://example.com");
+        UrlController.createUrl(ctx2);
+
+        verify(ctx2).sessionAttribute("flash", "Страница уже существует");
+        verify(ctx2).redirect("/urls");
+    }
+
+    @Test
     public void showUrlTest() {
         Url testUrl = new Url();
         testUrl.setId(1);
@@ -160,7 +218,7 @@ public final class UrlControllerTest {
     @Test
     public void checkUrlSuccess() throws IOException {
         String testHtml = Files.readString(Paths.get("src/test/resources/html/google-url-check.html"));
-        System.out.println(testHtml);
+        log.info("Test HTML: {}", testHtml);
 
         mockWebServer
                 .enqueue(new MockResponse.Builder()
@@ -169,14 +227,20 @@ public final class UrlControllerTest {
                 .build()
         );
 
+        // Создаём URL объект в базе данных и получаем его ID
+        Url url = new Url();
+        url.setName(mockWebServer.url("/").toString());
+        UrlRepository.save(url);
+        int urlId = url.getId();
+
         String testUrl = mockWebServer
-                .url("/urls/" + 1 + "/checks")
+                .url("/urls/" + urlId + "/checks")
                 .toString();
 
-        UrlCheck result = UrlCheckService.urlCheck(testUrl, 1);
+        UrlCheck result = UrlCheckService.urlCheck(testUrl, urlId);
 
         assertEquals(200, result.getStatusCode());
-        assertEquals(1, result.getUrlId());
+        assertEquals(urlId, result.getUrlId());
         assertEquals("Google", result.getTitle());
         assertEquals("Google h1", result.getH1());
         assertEquals("Google description", result.getDescription());
