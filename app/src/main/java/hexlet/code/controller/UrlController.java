@@ -4,7 +4,6 @@ import hexlet.code.dto.urls.UrlBuildPage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
-import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.service.UrlCheckService;
@@ -14,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URI;
-import java.util.HashMap;
 
 @Slf4j
 public class UrlController {
@@ -37,22 +33,11 @@ public class UrlController {
             return;
         }
 
-        URI parsedUri;
+        URI parsedUrl;
         try {
-            parsedUri = new URI(inputUrl);
+            parsedUrl = new URI(inputUrl);
         } catch (Exception e) {
             log.error("Некорректный URL: {}", inputUrl, e);
-            ctx.sessionAttribute("flash", "Некорректный URL");
-            ctx.status(HttpStatus.BAD_REQUEST);
-            ctx.redirect(NamedRoutes.buildUrlPath());
-            return;
-        }
-
-        URL parsedUrl;
-        try {
-            parsedUrl = parsedUri.toURL();
-        } catch (MalformedURLException e) {
-            log.error("URL не может быть преобразован: {}", inputUrl, e);
             ctx.sessionAttribute("flash", "Некорректный URL");
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.redirect(NamedRoutes.buildUrlPath());
@@ -88,10 +73,8 @@ public class UrlController {
     }
 
     public static void showUrls(Context ctx) {
-        var urlChecks = new HashMap<Integer, UrlCheck>();
         var urls = UrlRepository.getAllUrls();
-
-        urls.forEach(url -> urlChecks.put(url.getId(), UrlCheckRepository.findById(url.getId()).orElseThrow()));
+        var urlChecks = UrlCheckRepository.findLatestChecks();
 
         var page = new UrlsPage(urls, urlChecks);
 
@@ -105,17 +88,22 @@ public class UrlController {
         var id = ctx.pathParamAsClass("id", Integer.class).get();
         var url = UrlRepository.findById(id).orElseThrow();
 
-        var urlCheck = UrlCheckService.urlCheck(url.getName(), url.getId());
+        try {
+            var urlCheck = UrlCheckService.urlCheck(url.getName(), url.getId());
+            UrlCheckRepository.save(urlCheck);
+            ctx.sessionAttribute("flash", "Страница успешно проверена");
+        } catch (Exception e) {
+            log.error("Ошибка при проверке URL: {}", url.getName(), e);
+            ctx.sessionAttribute("flash", "Некорректный адрес");
+        }
 
-        UrlCheckRepository.save(urlCheck);
         ctx.redirect(NamedRoutes.urlPath(String.valueOf(id)));
-
     }
 
-    private static String normalizeUrl(URL url) {
-        String result = url.getProtocol() + "://" + url.getHost();
-        if (url.getPort() != -1) {
-            result += ":" + url.getPort();
+    private static String normalizeUrl(URI uri) {
+        String result = uri.getScheme() + "://" + uri.getHost();
+        if (uri.getPort() != -1) {
+            result += ":" + uri.getPort();
         }
         return result;
     }

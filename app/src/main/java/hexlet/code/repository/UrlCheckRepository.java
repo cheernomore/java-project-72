@@ -11,7 +11,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -114,6 +116,44 @@ public class UrlCheckRepository {
             return Optional.of(urlCheck.build());
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static Map<Integer, UrlCheck> findLatestChecks() {
+        var latestChecks = new HashMap<Integer, UrlCheck>();
+        var sql =
+                """
+                SELECT uc.*
+                FROM url_checks uc
+                INNER JOIN (
+                    SELECT url_id, MAX(created_at) as max_created_at
+                    FROM url_checks
+                    GROUP BY url_id
+                ) latest ON uc.url_id = latest.url_id AND uc.created_at = latest.max_created_at
+                """;
+
+        try (
+                Connection connection = DatabaseConnection.getDataSource().getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            var rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                var urlCheck = UrlCheck.builder()
+                        .urlId(rs.getInt("id"))
+                        .statusCode(rs.getInt("status_code"))
+                        .h1(rs.getString("h1"))
+                        .title(rs.getString("title"))
+                        .description(rs.getString("description"))
+                        .createdAt(rs.getTimestamp("created_at").toInstant())
+                        .build();
+
+                latestChecks.put(rs.getInt("url_id"), urlCheck);
+            }
+
+            return latestChecks;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get latest url checks", e);
         }
     }
 }

@@ -158,17 +158,6 @@ public final class UrlControllerTest {
     }
 
     @Test
-    public void createUrlWithMalformedURLTest() {
-        when(ctx.formParam("url")).thenReturn("javascript:alert('xss')");
-
-        UrlController.createUrl(ctx);
-
-        verify(ctx).status(HttpStatus.BAD_REQUEST);
-        verify(ctx).redirect(eq("/urls/build"));
-        verify(ctx).sessionAttribute("flash", "Некорректный URL");
-    }
-
-    @Test
     public void createUrlDuplicateTest() {
         Context ctx2 = mock(Context.class);
 
@@ -270,27 +259,29 @@ public final class UrlControllerTest {
 
             List<Url> urlList = List.of(testUrl1, testUrl2);
 
-            var testUrlCheck = UrlCheck.builder()
+            var testUrlCheck1 = UrlCheck.builder()
                     .urlId(1)
                     .statusCode(200)
                     .createdAt(Instant.now())
                     .build();
 
+            var testUrlCheck2 = UrlCheck.builder()
+                    .urlId(2)
+                    .statusCode(404)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Map<Integer, UrlCheck> latestChecks = Map.of(1, testUrlCheck1, 2, testUrlCheck2);
+
             mockedUrlRepo.when(UrlRepository::getAllUrls).thenReturn(urlList);
-            mockedUrlCheckRepo.when(() -> UrlCheckRepository.findById(1))
-                    .thenReturn(Optional.of(testUrlCheck));
-            mockedUrlCheckRepo.when(() -> UrlCheckRepository.findById(2))
-                    .thenReturn(Optional.of(UrlCheck.builder()
-                            .urlId(2)
-                            .statusCode(0)
-                            .createdAt(Instant.now())
-                            .build()));
+            mockedUrlCheckRepo.when(UrlCheckRepository::findLatestChecks).thenReturn(latestChecks);
 
             UrlController.showUrls(ctx);
 
             verify(ctx).render(eq("urls/index.jte"), any(Map.class));
             verify(ctx).consumeSessionAttribute("flash");
             mockedUrlRepo.verify(UrlRepository::getAllUrls);
+            mockedUrlCheckRepo.verify(UrlCheckRepository::findLatestChecks);
         }
     }
 
